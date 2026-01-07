@@ -3,26 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="USMS Rwanda 2025 - Multi-School Management System (Online)">
+    <meta name="description" content="USMS Rwanda 2025 - Multi-School Management System">
     <meta name="theme-color" content="#0B4D8D">
-    <title>USMS Rwanda 2025 - Online Multi-School System</title>
-
+    <title>USMS Rwanda 2025 - Multi-School System</title>
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
           integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxVe5uzm5u3z8=="
           crossorigin="anonymous" referrerpolicy="no-referrer" />
-
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- A-Frame for VR -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
     <style>
         :root {
             --primary: #0B4D8D;
@@ -285,29 +277,24 @@
     </style>
 </head>
 <body>
-
 <div id="loadingScreen" class="loading">
     <div class="spinner"></div>
-    <p>Loading USMS Rwanda Online...</p>
+    <p>Loading USMS Rwanda ...</p>
 </div>
-
 <div id="loginScreen">
-    <h2><i class="fas fa-school fa-2x"></i><br>USMS Rwanda 2025</h2>
+    <h2><i class="fas fa-school fa-2x"></i><br>USMS Rwanda </h2>
     <p><strong>Unified Multi-School Management System</strong></p>
-    <p style="margin:20px 0; color:#555;">Online • Real-time • Multi-Device • Secure</p>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
+    <p style="margin:20px 0; color:#555;">Offline-Capable • Multi-School • Secure</p>
+    <input type="text" id="username" placeholder="Username (admin/finance or staff code for head teachers)" autocomplete="username" required>
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
     <button class="btn-primary" style="width:100%; padding:14px; margin-top:20px;" onclick="login()">Login</button>
-    <p style="margin-top:20px; font-size:14px; color:#666;">
-        <strong>Default Accounts:</strong><br>
-        Admin: admin@usms.rw / password: admin123<br>
-        Finance: finance@usms.rw / password: finance123<br>
-        Head Teacher: ht@school.rw / password: head123
+    <p style="margin-top:30px; font-size:14px; color:#666;">
+        Contact your system administrator for login credentials.<br>
+        Try to use safety credentials and <br>
+        Use strong password with Characters, Symbols, Numbers,Small letters and acapital letters.
     </p>
 </div>
-
 <div id="app" class="hidden">
-    <!-- Same header and navigation as before -->
     <header>
         <div id="schoolInfo">
             <div id="schoolName">Select a School</div>
@@ -333,7 +320,6 @@
             <button onclick="logout()" class="btn-danger btn-sm">Logout</button>
         </div>
     </header>
-
     <nav id="navMenu">
         <button onclick="showTab('dashboard')" class="active">Dashboard</button>
         <button onclick="showTab('learners')">Learners</button>
@@ -343,188 +329,344 @@
         <button onclick="showTab('financeTab')">Finance</button>
         <button onclick="showTab('vrTab')">VR Tour</button>
     </nav>
-
     <div class="container">
-        <!-- All tabs same as your original code (dashboard, learners, staff, etc.) -->
-        <!-- Only IDs and structure kept, logic moved to script -->
-        <div id="dashboard" class="tab active card"> <!-- ... same content ... --> </div>
-        <div id="learners" class="tab card"> <!-- ... same content ... --> </div>
-        <div id="staff" class="tab card"> <!-- ... same content ... --> </div>
-        <div id="classes" class="tab card"> <!-- ... same content ... --> </div>
-        <div id="feesTab" class="tab card"> <!-- ... same content ... --> </div>
-        <div id="financeTab" class="tab card"> <!-- ... same content ... --> </div>
-        <div id="vrTab" class="tab card"> <!-- ... same content ... --> </div>
+        <div id="dashboard" class="tab active card">
+            <h2>Dashboard - Term <span id="dashTerm">1</span> <span id="dashYear">2025-2026</span></h2>
+            <div class="flex">
+                <div class="stat-card"><h3 id="dashTotalLearners">0</h3><p>Total Learners</p></div>
+                <div class="stat-card"><h3 id="dashBoys">0</h3><p>Boys</p></div>
+                <div class="stat-card"><h3 id="dashGirls">0</h3><p>Girls</p></div>
+                <div class="stat-card"><h3 id="dashTotalStaff">0</h3><p>Total Staff</p></div>
+                <div class="stat-card"><h3 id="dashFeesCollected">RWF 0</h3><p>Collected</p></div>
+                <div class="stat-card"><h3 id="dashFeesRate">0%</h3><p>Collection Rate</p></div>
+                <div class="stat-card"><h3 id="dashTotalClasses">0</h3><p>Classes</p></div>
+            </div>
+        </div>
+        <div id="learners" class="tab card">
+            <h2>Learners Management</h2>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+                <button class="btn-success" onclick="showAddLearnerModal()">Add Learner</button>
+                <button class="btn-primary" onclick="showLearnersListModal('all')">Full List</button>
+                <button class="btn-success" onclick="showLearnersListModal('paid')">Paid</button>
+                <button class="btn-warning" onclick="showLearnersListModal('partial')">Partial</button>
+                <button class="btn-danger" onclick="showLearnersListModal('pending')">Pending</button>
+                <button class="btn-primary" onclick="exportLearners()">Export All</button>
+                <button class="btn-primary" onclick="downloadLearnerTemplate()">Template</button>
+                <button class="btn-primary" onclick="document.getElementById('importLearnersFile').click()">Import CSV</button>
+                <select id="classFilter" onchange="renderLearners()"><option value="">All Classes</option></select>
+                <input type="text" id="learnerSearch" onkeyup="renderLearners()" placeholder="Search by Code or Name..." style="flex:1;">
+            </div>
+            <input type="file" id="importLearnersFile" style="display:none" accept=".csv" onchange="importLearners(event)">
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SDMS Code</th>
+                            <th>Name</th>
+                            <th>Father's Name</th>
+                            <th>Mother's Name</th>
+                            <th>Class</th>
+                            <th>Gender</th>
+                            <th>Due</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Payments</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="learnerList"></tbody>
+                </table>
+            </div>
+        </div>
+        <div id="staff" class="tab card">
+            <h2>Staff Management</h2>
+            <div style="margin-bottom:20px;">
+                <button class="btn-success" onclick="showAddStaffModal()">Add Staff</button>
+                <button class="btn-primary" onclick="exportStaff()">Export</button>
+                <button class="btn-primary" onclick="downloadStaffTemplate()">Template</button>
+                <button class="btn-primary" onclick="document.getElementById('importStaffFile').click()">Import</button>
+            </div>
+            <input type="file" id="importStaffFile" style="display:none" accept=".csv" onchange="importStaff(event)">
+            <table>
+                <thead><tr><th>Code</th><th>Name</th><th>Gender</th><th>Role</th><th>Actions</th></tr></thead>
+                <tbody id="staffList"></tbody>
+            </table>
+        </div>
+        <div id="classes" class="tab card">
+            <h2>Classes Management</h2>
+            <div style="margin-bottom:20px;">
+                <button class="btn-success" onclick="addClass()">Add New Class</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:30%;">Class Name</th>
+                        <th style="width:30%;">Number of Learners</th>
+                        <th style="width:40%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="classList"></tbody>
+            </table>
+            <div style="margin-top:20px; padding:15px; background:#e8f4fd; border-radius:8px; text-align:center; font-size:16px;">
+                <strong>Total Classes: <span id="totalClassesCount" style="color:var(--primary); font-size:22px;">0</span></strong>
+            </div>
+        </div>
+        <div id="feesTab" class="tab card">
+            <h2>Fees Structure - Term <span id="feesTermDisplay">1</span></h2>
+            <button class="btn-success" onclick="showFeesModal()">Edit Fees</button>
+            <div class="fees-grid">
+                <div class="fees-group"><h4>Nursery</h4><p>RWF <strong id="nurseryTotal">35,000</strong></p></div>
+                <div class="fees-group"><h4>P1-P3</h4><p>RWF <strong id="lowerTotal">45,000</strong></p></div>
+                <div class="fees-group"><h4>P4-P6</h4><p>RWF <strong id="upperTotal">55,000</strong></p></div>
+                <div class="fees-group"><h4>S1-S3</h4><p>RWF <strong id="ordinaryTotal">80,000</strong></p></div>
+                <div class="fees-group"><h4>S4-S6</h4><p>RWF <strong id="advancedTotal">100,000</strong></p></div>
+            </div>
+        </div>
+        <div id="financeTab" class="tab card">
+            <h2>Finance Overview</h2>
+            <div class="big-stat big-balance">RWF <span id="totalCollected">0</span><div>Total Collected</div></div>
+            <div class="big-stat big-outstanding">RWF <span id="totalOutstanding">0</span><div>Outstanding Balance</div></div>
+            <div class="chart-container"><canvas id="feesChart"></canvas></div>
+        </div>
+        <div id="vrTab" class="tab card">
+            <h2>Virtual School Tour (360° VR</h2>
+            <p>Drag to explore • Mobile: tap VR icon</p>
+            <div class="vr-container">
+                <a-scene embedded>
+                    <a-sky color="#87CEEB"></a-sky>
+                    <a-plane position="0 0 -4" rotation="-90 0 0" width="80" height="80" color="#7BC8A4"></a-plane>
+                    <a-box position="-10 4 -20" depth="18" height="8" width="30" color="#D2691E"></a-box>
+                    <a-text value="YOUR SCHOOL" position="-10 7 -11" color="white" align="center" width="35"></a-text>
+                    <a-box position="15 3 -15" depth="12" height="6" width="18" color="#FFB74D"></a-box>
+                    <a-box position="15 3 -28" depth="12" height="6" width="18" color="#FFB74D"></a-box>
+                    <a-cylinder position="0 0.1 -35" radius="15" height="0.2" color="#8BC34A"></a-cylinder>
+                    <a-text value="Playground" position="0 1 -35" color="#333" align="center"></a-text>
+                    <a-camera position="0 1.6 5"></a-camera>
+                </a-scene>
+            </div>
+        </div>
     </div>
 </div>
-
-<!-- All modals same as original (learnersListModal, paymentHistoryModal, addLearnerModal, etc.) -->
-<!-- Omitted here for brevity – keep them exactly as in your original code -->
-
+<!-- Modals -->
+<div id="learnersListModal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="learnersListTitle">Learners Report</h3>
+        <p id="learnersListSchool"></p>
+        <div style="margin:20px 0;">
+            <button class="btn-primary no-print" onclick="window.print()">Print / PDF</button>
+            <button class="btn-danger no-print" onclick="closeModal('learnersListModal')">Close</button>
+        </div>
+        <table>
+            <thead><tr><th>No</th><th>Code</th><th>Name</th><th>Father</th><th>Mother</th><th>Class</th><th>Gender</th><th>Due</th><th>Paid</th><th>Balance</th><th>Status</th></tr></thead>
+            <tbody id="learnersListTable"></tbody>
+        </table>
+        <p style="margin-top:20px; text-align:right;">Total: <strong id="totalLearnersCount">0</strong> learners</p>
+    </div>
+</div>
+<div id="paymentHistoryModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Payment History - <span id="phName"></span> (<span id="phRegNo"></span>)</h3>
+        <table>
+            <thead><tr><th>Date</th><th>Amount</th><th>Reason</th></tr></thead>
+            <tbody id="paymentHistoryTable"></tbody>
+        </table>
+        <button class="btn-danger" style="margin-top:20px;" onclick="closeModal('paymentHistoryModal')">Close</button>
+    </div>
+</div>
+<div id="addLearnerModal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="learnerModalTitle">Add Learner</h3>
+        <form id="addLearnerForm">
+            <label>SDMS Code</label><input type="text" id="learnerRegNo" required>
+            <label>Name</label><input type="text" id="learnerName" required>
+            <label>Father's Name</label><input type="text" id="learnerFatherName">
+            <label>Mother's Name</label><input type="text" id="learnerMotherName">
+            <label>Gender</label>
+            <select id="learnerGender" required>
+                <option value="">Select</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+            </select>
+            <label>Class</label><select id="learnerClass" required><option value="">Select</option></select>
+            <div style="text-align:right; margin-top:20px;">
+                <button type="submit" class="btn-success">Save</button>
+                <button type="button" class="btn-danger" onclick="closeModal('addLearnerModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="addStaffModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Add Staff</h3>
+        <form id="addStaffForm">
+            <label>Code</label><input type="text" id="staffRegNo" required>
+            <label>Name</label><input type="text" id="staffName" required>
+            <label>Gender</label>
+            <select id="staffGender" required>
+                <option value="">Select</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+            </select>
+            <label>Role</label><input type="text" id="staffRole" placeholder="e.g. Teacher, Head Teacher" required>
+            <div style="text-align:right; margin-top:20px;">
+                <button type="submit" class="btn-success">Save</button>
+                <button type="button" class="btn-danger" onclick="closeModal('addStaffModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="addSchoolModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Add New School</h3>
+        <form id="addSchoolForm">
+            <label>School Name</label><input type="text" id="schoolNameInput" required>
+            <label>SDMS School Code</label><input type="text" id="schoolCodeInput" placeholder="e.g. GS001" required style="text-transform:uppercase;">
+            <label>Province</label><input type="text" id="schoolProvinceInput" required>
+            <label>District</label><input type="text" id="schoolDistrictInput" required>
+            <label>Sector</label><input type="text" id="schoolSectorInput" required>
+            <label>Head Teacher</label>
+            <select id="schoolHeadTeacherInput">
+                <option value="">None</option>
+            </select>
+            <div style="text-align:right; margin-top:20px;">
+                <button type="submit" class="btn-success">Save</button>
+                <button type="button" class="btn-danger" onclick="closeModal('addSchoolModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="editSchoolModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Edit School Details</h3>
+        <form id="editSchoolForm">
+            <label>School Name</label><input type="text" id="editSchoolName" required>
+            <label>SDMS School Code</label><input type="text" id="editSchoolCode" required style="text-transform:uppercase;">
+            <label>Province</label><input type="text" id="editProvince" required>
+            <label>District</label><input type="text" id="editDistrict" required>
+            <label>Sector</label><input type="text" id="editSector" required>
+            <label>Head Teacher</label>
+            <select id="editHeadTeacher"></select>
+            <div style="text-align:right; margin-top:20px;">
+                <button type="submit" class="btn-success">Update</button>
+                <button type="button" class="btn-danger" onclick="closeModal('editSchoolModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="feesModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Edit Fees Structure - Term <span id="feesModalTerm">1</span></h3>
+        <div class="fees-grid">
+            <div class="fees-group"><h4>Nursery</h4><label>School Fees</label><input type="number" id="nursery_school" value="35000"></div>
+            <div class="fees-group"><h4>P1-P3</h4><label>School Fees</label><input type="number" id="lower_school" value="45000"></div>
+            <div class="fees-group"><h4>P4-P6</h4><label>School Fees</label><input type="number" id="upper_school" value="55000"></div>
+            <div class="fees-group"><h4>S1-S3</h4><label>School Fees</label><input type="number" id="ordinary_school" value="80000"></div>
+            <div class="fees-group"><h4>S4-S6</h4><label>School Fees</label><input type="number" id="advanced_school" value="100000"></div>
+        </div>
+        <div style="text-align:right;">
+            <button class="btn-success" onclick="saveFeesStructure()">Save</button>
+            <button class="btn-danger" onclick="closeModal('feesModal')">Cancel</button>
+        </div>
+    </div>
+</div>
 <script>
-// ======================== FIREBASE CONFIGURATION ========================
-// REPLACE WITH YOUR OWN FIREBASE PROJECT CONFIG (get from Firebase Console)
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
+// ======================== DATA & STATE ========================
+let currentSchoolId = localStorage.getItem('usms_current_school') || null;
+let currentRole = '';
+let schools = JSON.parse(localStorage.getItem('usms_schools') || JSON.stringify([
+    { id: "demo2025", name: "GS Demo Rwanda 2025", sdmsCode: "GSDEM025", province: "Kigali", district: "Gasabo", sector: "Remera", headTeacherRegNo: "" }
+]));
+const defaultFees = {
+    1: { nursery: {school:35000}, lower: {school:45000}, upper: {school:55000}, ordinary: {school:80000}, advanced: {school:100000} },
+    2: { nursery: {school:35000}, lower: {school:45000}, upper: {school:55000}, ordinary: {school:80000}, advanced: {school:100000} },
+    3: { nursery: {school:35000}, lower: {school:45000}, upper: {school:55000}, ordinary: {school:80000}, advanced: {school:100000} }
 };
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// ======================== GLOBAL STATE ========================
-let currentUser = null;
-let currentRole = ''; // 'admin', 'finance', 'headteacher'
-let currentSchoolId = null;
 let currentYear = '2025-2026';
 let currentTerm = 1;
-
-let schools = [];
-let learners = [];
-let staff = [];
-let payments = [];
-let classes = [];
-let feesStructure = {};
-
-// ======================== AUTHENTICATION ========================
+let learners = [], staff = [], payments = [], classes = [], feesStructure = defaultFees;
+let currentChart = null;
+// ======================== AUTH & INITIALIZATION ========================
 function login() {
-    const email = document.getElementById('email').value.trim();
+    const username = document.getElementById('username').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
-
-    auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            currentUser = userCredential.user;
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            loadUserRoleAndSchools();
-        })
-        .catch((error) => {
-            alert('Login failed: ' + error.message);
-        });
-}
-
-function logout() {
-    auth.signOut().then(() => {
-        location.reload();
-    });
-}
-
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        currentUser = user;
-        document.getElementById('currentUser').textContent = user.email.split('@')[0];
-    } else {
-        document.getElementById('app').classList.add('hidden');
-        document.getElementById('loginScreen').classList.remove('hidden');
+    if (password !== '1234') {
+        alert('Invalid password.');
+        return;
     }
-    document.getElementById('loadingScreen').classList.add('hidden');
-});
-
-// ======================== LOAD USER ROLE & SCHOOLS ========================
-async function loadUserRoleAndSchools() {
-    const snapshot = await db.collection('schools').get();
-    schools = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-
-    // Determine role
-    if (currentUser.email === 'admin@usms.rw') {
-        currentRole = 'admin';
-    } else if (currentUser.email === 'finance@usms.rw') {
-        currentRole = 'finance';
+    if (username === 'admin' || username === 'finance') {
+        currentRole = username;
+        document.getElementById('currentUser').textContent = username.charAt(0).toUpperCase() + username.slice(1);
     } else {
-        // Head teacher: find school where headTeacherEmail matches
-        const school = schools.find(s => s.headTeacherEmail === currentUser.email);
-        if (school) {
-            currentRole = 'headteacher';
-            currentSchoolId = school.id;
-        } else {
-            alert('No school assigned to your account.');
-            logout();
+        // Assume username is regNo for head teacher
+        let found = false;
+        let assignedSchoolId = null;
+        schools.forEach(s => {
+            const tempId = currentSchoolId;
+            currentSchoolId = s.id;
+            loadSchoolData();
+            const ht = staff.find(st => st.regNo.toLowerCase() === username && st.role === 'Head Teacher');
+            if (ht) {
+                found = true;
+                assignedSchoolId = s.id;
+                currentRole = 'headteacher';
+                document.getElementById('currentUser').textContent = ht.name;
+            }
+            currentSchoolId = tempId;
+        });
+        if (!found) {
+            alert('Invalid credentials. For head teachers, use your staff code.');
             return;
         }
+        currentSchoolId = assignedSchoolId;
     }
-
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
     populateSchoolSelector();
+    switchSchool(currentSchoolId || schools[0].id);
     if (currentRole === 'headteacher') {
         document.getElementById('schoolSelector').style.display = 'none';
         document.getElementById('addSchoolBtn').style.display = 'none';
+        document.getElementById('editSchoolBtn').style.display = 'inline-block'; // Allow editing their own school
+    } else {
+        document.getElementById('schoolSelector').style.display = 'inline-block';
+        document.getElementById('addSchoolBtn').style.display = 'inline-block';
+        document.getElementById('editSchoolBtn').style.display = 'inline-block';
     }
-    switchSchool(currentSchoolId || schools[0]?.id);
+    setTimeout(() => document.getElementById('loadingScreen').classList.add('hidden'), 800);
 }
-
-// ======================== REAL-TIME DATA LISTENERS ========================
-function subscribeToSchoolData(schoolId) {
-    if (!schoolId) return;
-
-    currentSchoolId = schoolId;
-
-    const base = db.collection('schools').doc(schoolId);
-
-    base.collection('learners').onSnapshot(snapshot => {
-        learners = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        renderAll();
-    });
-
-    base.collection('staff').onSnapshot(snapshot => {
-        staff = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        renderAll();
-    });
-
-    base.collection('payments').where('term', '==', currentTerm).onSnapshot(snapshot => {
-        payments = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        renderAll();
-    });
-
-    base.collection('classes').onSnapshot(snapshot => {
-        classes = snapshot.docs.map(doc => doc.data().name);
-        classes.sort();
-        renderAll();
-    });
-
-    base.get().then(doc => {
-        const data = doc.data();
-        feesStructure = data.feesStructure || {1: {}, 2: {}, 3: {}};
-        document.getElementById('schoolName').textContent = data.name || 'Unknown';
-        document.getElementById('schoolCode').textContent = data.sdmsCode ? `SDMS Code: ${data.sdmsCode}` : '';
-        document.getElementById('schoolLocation').textContent = `${data.province} • ${data.district} • ${data.sector}`;
-        renderFeesSummary();
-    });
+function logout() {
+    currentRole = '';
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
 }
-
-// ======================== REST OF FUNCTIONS (same logic, now using Firestore) ========================
-// All functions like renderDashboard(), renderLearners(), recordPayment(), etc.
-// are the same as your original code, but now use the global arrays (learners, staff, payments)
-// which are updated in real-time from Firestore.
-
-// Example of save operation:
-async function recordPayment(regNo, name) {
-    const amountStr = prompt(`Record payment for ${name} (${regNo})\nAmount (RWF):`);
-    if (!amountStr || isNaN(amountStr)) return;
-    const amount = parseInt(amountStr);
-    const reason = prompt('Reason:', 'School Fees') || 'School Fees';
-
-    await db.collection('schools').doc(currentSchoolId)
-        .collection('payments')
-        .add({
-            regNo, name, amount, reason,
-            term: currentTerm,
-            date: new Date().toISOString().split('T')[0],
-            recordedBy: currentUser.email
-        });
-
-    alert(`Payment recorded successfully!`);
+// ======================== SCHOOL MANAGEMENT ========================
+function getCurrentSchool() {
+    return schools.find(s => s.id === currentSchoolId);
 }
-
-// Similar async/await updates needed for add/edit/delete learner, staff, fees, etc.
-
-// For brevity, the full CRUD functions are omitted here but follow the same pattern:
-// - Use db.collection('schools').doc(currentSchoolId).collection('learners').add({...})
-// - Use .doc(id).update() or .delete()
-
-// ======================== INITIALIZATION ========================
+function getKey(key) {
+    return currentSchoolId ? `usms_${currentSchoolId}_${currentYear}_${key}` : null;
+}
+function loadSchoolData() {
+    if (!currentSchoolId) return;
+    learners = JSON.parse(localStorage.getItem(getKey('learners')) || '[]');
+    staff = JSON.parse(localStorage.getItem(getKey('staff')) || '[]');
+    payments = JSON.parse(localStorage.getItem(getKey('payments')) || '[]');
+    classes = JSON.parse(localStorage.getItem(getKey('classes')) || JSON.stringify(["Nursery","P1","P2","P3","P4","P5","P6","S1","S2","S3","S4","S5","S6"]));
+    feesStructure = JSON.parse(localStorage.getItem(getKey('fees')) || JSON.stringify(defaultFees));
+    currentTerm = parseInt(localStorage.getItem(getKey('term')) || '1');
+}
+function saveSchoolData() {
+    if (!currentSchoolId) return;
+    localStorage.setItem(getKey('learners'), JSON.stringify(learners));
+    localStorage.setItem(getKey('staff'), JSON.stringify(staff));
+    localStorage.setItem(getKey('payments'), JSON.stringify(payments));
+    localStorage.setItem(getKey('classes'), JSON.stringify(classes));
+    localStorage.setItem(getKey('fees'), JSON.stringify(feesStructure));
+    localStorage.setItem(getKey('term'), currentTerm.toString());
+}
 function populateSchoolSelector() {
     const select = document.getElementById('schoolSelector');
     select.innerHTML = '<option value="">Select School</option>';
@@ -536,24 +678,592 @@ function populateSchoolSelector() {
         select.appendChild(opt);
     });
 }
-
 function switchSchool(id) {
-    if (!id) return;
     if (currentRole === 'headteacher' && id !== currentSchoolId) {
         alert('You can only access your assigned school.');
         return;
     }
-    subscribeToSchoolData(id);
+    if (!id) return;
+    currentSchoolId = id;
+    localStorage.setItem('usms_current_school', id);
+    const school = getCurrentSchool();
+    document.getElementById('schoolName').textContent = school.name;
+    document.getElementById('schoolCode').textContent = school.sdmsCode ? `SDMS Code: ${school.sdmsCode}` : '';
+    const ht = staff.find(s => s.regNo === school.headTeacherRegNo);
+    document.getElementById('headTeacher').textContent = ht ? `Head Teacher: ${ht.name}` : '';
+    document.getElementById('schoolLocation').textContent = `${school.province} • ${school.district} • ${school.sector}`;
+    document.getElementById('editSchoolBtn').style.display = 'inline-block';
+    loadSchoolData();
+    updateDisplays();
+    renderAll();
+    populateHeadTeacherOptions('editHeadTeacher');
+    populateHeadTeacherOptions('schoolHeadTeacherInput');
 }
-
-// Keep all your existing render functions, showTab, modals, etc.
-// They will work automatically with real-time data
-
-// Start loading when DOM ready
+function showAddSchoolModal() {
+    if (currentRole === 'headteacher') {
+        alert('You cannot add schools.');
+        return;
+    }
+    document.getElementById('addSchoolForm').reset();
+    document.getElementById('schoolHeadTeacherInput').innerHTML = '<option value="">None</option>'; // Since new school, no staff yet
+    document.getElementById('addSchoolModal').classList.remove('hidden');
+}
+function showEditSchoolModal() {
+    const school = getCurrentSchool();
+    if (!school) return;
+    document.getElementById('editSchoolName').value = school.name;
+    document.getElementById('editSchoolCode').value = school.sdmsCode || '';
+    document.getElementById('editProvince').value = school.province;
+    document.getElementById('editDistrict').value = school.district;
+    document.getElementById('editSector').value = school.sector;
+    populateHeadTeacherOptions('editHeadTeacher');
+    document.getElementById('editHeadTeacher').value = school.headTeacherRegNo || '';
+    document.getElementById('editSchoolModal').classList.remove('hidden');
+}
+document.getElementById('addSchoolForm').onsubmit = function(e) {
+    e.preventDefault();
+    const name = document.getElementById('schoolNameInput').value.trim();
+    const sdmsCode = document.getElementById('schoolCodeInput').value.trim().toUpperCase();
+    const province = document.getElementById('schoolProvinceInput').value.trim();
+    const district = document.getElementById('schoolDistrictInput').value.trim();
+    const sector = document.getElementById('schoolSectorInput').value.trim();
+    const headTeacherRegNo = document.getElementById('schoolHeadTeacherInput').value || '';
+    if (!name || !sdmsCode || !province || !district || !sector) return alert('All fields except Head Teacher are required');
+    const id = name.toLowerCase().replace(/[^a-z0-9]/g, '') + '_' + Date.now();
+    schools.push({id, name, sdmsCode, province, district, sector, headTeacherRegNo});
+    localStorage.setItem('usms_schools', JSON.stringify(schools));
+    currentSchoolId = id;
+    localStorage.setItem('usms_current_school', id);
+    populateSchoolSelector();
+    closeModal('addSchoolModal');
+    switchSchool(id);
+};
+document.getElementById('editSchoolForm').onsubmit = function(e) {
+    e.preventDefault();
+    const school = getCurrentSchool();
+    if (!school) return;
+    school.name = document.getElementById('editSchoolName').value.trim();
+    school.sdmsCode = document.getElementById('editSchoolCode').value.trim().toUpperCase();
+    school.province = document.getElementById('editProvince').value.trim();
+    school.district = document.getElementById('editDistrict').value.trim();
+    school.sector = document.getElementById('editSector').value.trim();
+    school.headTeacherRegNo = document.getElementById('editHeadTeacher').value || '';
+    localStorage.setItem('usms_schools', JSON.stringify(schools));
+    closeModal('editSchoolModal');
+    switchSchool(currentSchoolId);
+};
+function populateHeadTeacherOptions(selectId) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = '<option value="">None</option>';
+    staff.filter(s => s.role === 'Head Teacher').forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.regNo;
+        opt.textContent = `${s.regNo} - ${s.name}`;
+        select.appendChild(opt);
+    });
+}
+// ======================== The rest of the script remains the same as in the original, including UI navigation, fees, payments, rendering, CRUD for learners, staff, classes, etc. ========================
+function showTab(id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#navMenu button').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelector(`#navMenu button[onclick="showTab('${id}')"]`).classList.add('active');
+    if (id === 'financeTab') renderFinanceChart();
+}
+function changeYear(y) {
+    currentYear = y;
+    loadSchoolData();
+    updateDisplays();
+    renderAll();
+}
+function changeTerm(t) {
+    currentTerm = parseInt(t);
+    saveSchoolData();
+    updateDisplays();
+    renderAll();
+}
+function updateDisplays() {
+    document.getElementById('dashYear').textContent = currentYear;
+    document.getElementById('yearSelector').value = currentYear;
+    document.getElementById('dashTerm').textContent = currentTerm;
+    document.getElementById('termSelector').value = currentTerm;
+    document.getElementById('feesTermDisplay').textContent = currentTerm;
+    document.getElementById('feesModalTerm').textContent = currentTerm;
+}
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+function getFeesDue(className) {
+    if (!className) return 0;
+    const lc = className.toLowerCase();
+    const f = feesStructure[currentTerm];
+    if (lc.includes('nursery')) return f.nursery.school || 35000;
+    if (/p[1-3]/i.test(lc)) return f.lower.school || 45000;
+    if (/p[4-6]/i.test(lc)) return f.upper.school || 55000;
+    if (/s[1-3]/i.test(lc)) return f.ordinary.school || 80000;
+    if (/s[4-6]/i.test(lc)) return f.advanced.school || 100000;
+    return 0;
+}
+function getLearnerPayments(regNo) {
+    return payments.filter(p => p.regNo === regNo && p.term === currentTerm);
+}
+function recordPayment(regNo, name) {
+    const amountStr = prompt(`Record payment for ${name} (${regNo})\nAmount (RWF):`);
+    if (!amountStr || isNaN(amountStr) || parseFloat(amountStr) <= 0) return;
+    const amount = parseInt(amountStr);
+    const reason = prompt('Reason:', 'School Fees') || 'School Fees';
+    payments.push({ regNo, name, amount, reason, term: currentTerm, date: new Date().toISOString().split('T')[0] });
+    saveSchoolData();
+    renderAll();
+    alert(`RWF ${amount.toLocaleString()} recorded!`);
+}
+function renderDashboard() {
+    const totalDue = learners.reduce((s, l) => s + getFeesDue(l.class), 0);
+    const totalPaid = payments.filter(p => p.term === currentTerm).reduce((s, p) => s + p.amount, 0);
+    const rate = totalDue > 0 ? Math.round((totalPaid / totalDue) * 100) : 0;
+    document.getElementById('dashTotalLearners').textContent = learners.length;
+    document.getElementById('dashBoys').textContent = learners.filter(l => l.gender === 'M').length;
+    document.getElementById('dashGirls').textContent = learners.filter(l => l.gender === 'F').length;
+    document.getElementById('dashTotalStaff').textContent = staff.length;
+    document.getElementById('dashFeesCollected').textContent = 'RWF ' + totalPaid.toLocaleString();
+    document.getElementById('dashFeesRate').textContent = rate + '%';
+    document.getElementById('dashTotalClasses').textContent = classes.length;
+}
+function renderFinanceChart() {
+    const totalDue = learners.reduce((s, l) => s + getFeesDue(l.class), 0);
+    const totalPaid = payments.filter(p => p.term === currentTerm).reduce((s, p) => s + p.amount, 0);
+    const outstanding = totalDue - totalPaid;
+    document.getElementById('totalCollected').textContent = totalPaid.toLocaleString();
+    document.getElementById('totalOutstanding').textContent = outstanding.toLocaleString();
+    if (currentChart) currentChart.destroy();
+    currentChart = new Chart(document.getElementById('feesChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Collected', 'Outstanding'],
+            datasets: [{ data: [totalPaid, outstanding || 1], backgroundColor: ['#27ae60', '#e74c3c'] }]
+        },
+        options: { responsive: true }
+    });
+}
+function renderFeesSummary() {
+    const f = feesStructure[currentTerm];
+    document.getElementById('nurseryTotal').textContent = (f.nursery.school || 35000).toLocaleString();
+    document.getElementById('lowerTotal').textContent = (f.lower.school || 45000).toLocaleString();
+    document.getElementById('upperTotal').textContent = (f.upper.school || 55000).toLocaleString();
+    document.getElementById('ordinaryTotal').textContent = (f.ordinary.school || 80000).toLocaleString();
+    document.getElementById('advancedTotal').textContent = (f.advanced.school || 100000).toLocaleString();
+}
+function renderLearners() {
+    const search = document.getElementById('learnerSearch').value.toLowerCase();
+    const classFilter = document.getElementById('classFilter').value;
+    const tbody = document.getElementById('learnerList');
+    tbody.innerHTML = '';
+    let filtered = learners.filter(l =>
+        (l.regNo.toLowerCase().includes(search) || l.name.toLowerCase().includes(search)) &&
+        (!classFilter || l.class === classFilter)
+    );
+    filtered.sort((a, b) => a.regNo.localeCompare(b.regNo));
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:60px;color:#999;">No learners found</td></tr>';
+        return;
+    }
+    filtered.forEach(l => {
+        const due = getFeesDue(l.class);
+        const paid = getLearnerPayments(l.regNo).reduce((s, p) => s + p.amount, 0);
+        const balance = due - paid;
+        const status = paid >= due ? 'PAID' : paid > 0 ? 'PARTIAL' : 'PENDING';
+        const statusClass = `status-${status.toLowerCase()}`;
+        const count = getLearnerPayments(l.regNo).length;
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>${l.regNo}</strong></td>
+                <td>${l.name}</td>
+                <td>${l.fatherName || '—'}</td>
+                <td>${l.motherName || '—'}</td>
+                <td>${l.class || '—'}</td>
+                <td>${l.gender === 'M' ? 'Male' : 'Female'}</td>
+                <td>RWF ${due.toLocaleString()}</td>
+                <td>RWF ${paid.toLocaleString()}</td>
+                <td>RWF ${balance.toLocaleString()}</td>
+                <td><span class="status-badge ${statusClass}">${status}</span></td>
+                <td><span class="payment-details" onclick="showPaymentHistory('${l.regNo}', '${l.name.replace(/'/g, "\\'")}')">View (${count})</span></td>
+                <td style="white-space:nowrap;">
+                    <button class="btn-sm btn-primary" onclick="editLearner('${l.regNo}')">Edit</button>
+                    <button class="btn-sm btn-pay" onclick="recordPayment('${l.regNo}', '${l.name.replace(/'/g, "\\'")}')">Pay</button>
+                    <button class="btn-sm btn-danger" onclick="deleteLearner('${l.regNo}')">Delete</button>
+                </td>
+            </tr>`;
+    });
+}
+function renderStaff() {
+    const tbody = document.getElementById('staffList');
+    tbody.innerHTML = staff.length === 0 ? '<tr><td colspan="5" style="text-align:center;padding:60px;color:#999;">No staff registered</td></tr>' : '';
+    staff.forEach((s, i) => {
+        tbody.innerHTML += `<tr>
+            <td>${s.regNo}</td>
+            <td>${s.name}</td>
+            <td>${s.gender === 'M' ? 'Male' : 'Female'}</td>
+            <td>${s.role}</td>
+            <td>
+                <button class="btn-sm btn-primary" onclick="editStaff(${i})">Edit</button>
+                <button class="btn-sm btn-danger" onclick="deleteStaff(${i})">Delete</button>
+            </td>
+        </tr>`;
+    });
+}
+function renderClasses() {
+    const tbody = document.getElementById('classList');
+    tbody.innerHTML = '';
+    if (classes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:80px;color:#999;font-size:18px;">No classes created yet.<br><br>Click "Add New Class" to begin.</td></tr>';
+        document.getElementById('totalClassesCount').textContent = '0';
+        return;
+    }
+    classes.sort().forEach(c => {
+        const count = learners.filter(l => l.class === c).length;
+        const plural = count !== 1 ? 's' : '';
+        tbody.innerHTML += `
+            <tr>
+                <td style="font-size:20px;font-weight:600;color:var(--primary);">${c}</td>
+                <td style="text-align:center;font-size:28px;font-weight:bold;color:${count > 0 ? 'var(--success)' : '#999'};">
+                    ${count}
+                    <div style="font-size:14px;color:#666;margin-top:5px;">learner${plural}</div>
+                </td>
+                <td class="class-actions">
+                    <button class="btn-sm btn-primary" onclick="editClassName('${c}')"><i class="fas fa-edit"></i> Rename</button>
+                    <button class="btn-sm btn-success" onclick="showLearnersListModal('all', '${c}')"><i class="fas fa-users"></i> View</button>
+                    <button class="btn-sm btn-danger" onclick="deleteClass('${c}')"><i class="fas fa-trash"></i> Delete</button>
+                </td>
+            </tr>`;
+    });
+    document.getElementById('totalClassesCount').textContent = classes.length;
+}
+function populateClassFilter() {
+    const select = document.getElementById('classFilter');
+    select.innerHTML = '<option value="">All Classes</option>';
+    classes.sort().forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+    });
+}
+function populateClassDropdown() {
+    const select = document.getElementById('learnerClass');
+    select.innerHTML = '<option value="">Select Class</option>';
+    classes.sort().forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+    });
+}
+function showPaymentHistory(regNo, name) {
+    document.getElementById('phName').textContent = name;
+    document.getElementById('phRegNo').textContent = regNo;
+    const tbody = document.getElementById('paymentHistoryTable');
+    tbody.innerHTML = '';
+    const pays = getLearnerPayments(regNo);
+    if (pays.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No payments recorded</td></tr>';
+    } else {
+        pays.forEach(p => {
+            tbody.innerHTML += `<tr><td>${p.date}</td><td>RWF ${p.amount.toLocaleString()}</td><td>${p.reason}</td></tr>`;
+        });
+    }
+    document.getElementById('paymentHistoryModal').classList.remove('hidden');
+}
+function showLearnersListModal(filter = 'all', specificClass = '') {
+    const school = getCurrentSchool();
+    let title = filter.charAt(0).toUpperCase() + filter.slice(1) + ' Learners';
+    if (specificClass) title = `Learners in ${specificClass}`;
+    document.getElementById('learnersListTitle').textContent = `${title} - Term ${currentTerm}`;
+    document.getElementById('learnersListSchool').textContent = school ? school.name : '';
+    const tbody = document.getElementById('learnersListTable');
+    tbody.innerHTML = '';
+    let list = learners;
+    if (specificClass) {
+        list = learners.filter(l => l.class === specificClass);
+    } else if (filter !== 'all') {
+        list = learners.filter(l => {
+            const due = getFeesDue(l.class);
+            const paid = getLearnerPayments(l.regNo).reduce((s, p) => s + p.amount, 0);
+            if (filter === 'paid') return paid >= due;
+            if (filter === 'partial') return paid > 0 && paid < due;
+            if (filter === 'pending') return paid === 0;
+            return true;
+        });
+    }
+    document.getElementById('totalLearnersCount').textContent = list.length;
+    list.forEach((l, i) => {
+        const due = getFeesDue(l.class);
+        const paid = getLearnerPayments(l.regNo).reduce((s, p) => s + p.amount, 0);
+        const balance = due - paid;
+        const status = paid >= due ? 'PAID' : paid > 0 ? 'PARTIAL' : 'PENDING';
+        tbody.innerHTML += `<tr>
+            <td>${i + 1}</td>
+            <td>${l.regNo}</td>
+            <td>${l.name}</td>
+            <td>${l.fatherName || '—'}</td>
+            <td>${l.motherName || '—'}</td>
+            <td>${l.class}</td>
+            <td>${l.gender === 'M' ? 'Male' : 'Female'}</td>
+            <td>RWF ${due.toLocaleString()}</td>
+            <td>RWF ${paid.toLocaleString()}</td>
+            <td>RWF ${balance.toLocaleString()}</td>
+            <td>${status}</td>
+        </tr>`;
+    });
+    document.getElementById('learnersListModal').classList.remove('hidden');
+}
+function renderAll() {
+    renderDashboard();
+    renderLearners();
+    renderStaff();
+    renderClasses();
+    renderFeesSummary();
+    populateClassFilter();
+    populateClassDropdown();
+    if (document.getElementById('financeTab').classList.contains('active')) renderFinanceChart();
+}
+function showAddLearnerModal() {
+    document.getElementById('learnerModalTitle').textContent = 'Add Learner';
+    document.getElementById('addLearnerForm').reset();
+    delete document.getElementById('addLearnerForm').dataset.editIndex;
+    populateClassDropdown();
+    document.getElementById('addLearnerModal').classList.remove('hidden');
+}
+function editLearner(regNo) {
+    const l = learners.find(l => l.regNo === regNo);
+    if (!l) return;
+    document.getElementById('learnerRegNo').value = l.regNo;
+    document.getElementById('learnerName').value = l.name;
+    document.getElementById('learnerFatherName').value = l.fatherName || '';
+    document.getElementById('learnerMotherName').value = l.motherName || '';
+    document.getElementById('learnerGender').value = l.gender;
+    document.getElementById('learnerClass').value = l.class;
+    document.getElementById('addLearnerForm').dataset.editIndex = learners.indexOf(l);
+    document.getElementById('learnerModalTitle').textContent = 'Edit Learner';
+    populateClassDropdown();
+    document.getElementById('addLearnerModal').classList.remove('hidden');
+}
+function deleteLearner(regNo) {
+    if (confirm('Delete this learner and all their payments?')) {
+        learners = learners.filter(l => l.regNo !== regNo);
+        payments = payments.filter(p => p.regNo !== regNo);
+        saveSchoolData();
+        renderAll();
+    }
+}
+document.getElementById('addLearnerForm').onsubmit = function(e) {
+    e.preventDefault();
+    const regNo = document.getElementById('learnerRegNo').value.trim().toUpperCase();
+    const name = document.getElementById('learnerName').value.trim();
+    const fatherName = document.getElementById('learnerFatherName').value.trim();
+    const motherName = document.getElementById('learnerMotherName').value.trim();
+    const gender = document.getElementById('learnerGender').value;
+    const cls = document.getElementById('learnerClass').value;
+    if (!regNo || !name || !gender || !cls) return alert('Required fields: SDMS Code, Name, Gender, Class');
+    const editIndex = this.dataset.editIndex;
+    if (editIndex !== undefined) {
+        learners[parseInt(editIndex)] = {regNo, name, fatherName, motherName, gender, class: cls};
+    } else {
+        if (learners.some(l => l.regNo === regNo)) return alert('SDMS Code already exists');
+        learners.push({regNo, name, fatherName, motherName, gender, class: cls});
+    }
+    saveSchoolData();
+    closeModal('addLearnerModal');
+    renderAll();
+};
+function showAddStaffModal() {
+    document.getElementById('addStaffForm').reset();
+    delete document.getElementById('addStaffForm').dataset.index;
+    document.getElementById('addStaffModal').classList.remove('hidden');
+}
+function editStaff(i) {
+    const s = staff[i];
+    document.getElementById('staffRegNo').value = s.regNo;
+    document.getElementById('staffName').value = s.name;
+    document.getElementById('staffGender').value = s.gender;
+    document.getElementById('staffRole').value = s.role;
+    document.getElementById('addStaffForm').dataset.index = i;
+    document.getElementById('addStaffModal').classList.remove('hidden');
+}
+function deleteStaff(i) {
+    if (confirm('Delete this staff member?')) {
+        staff.splice(i, 1);
+        saveSchoolData();
+        renderStaff();
+    }
+}
+document.getElementById('addStaffForm').onsubmit = function(e) {
+    e.preventDefault();
+    const regNo = document.getElementById('staffRegNo').value.trim().toUpperCase();
+    const name = document.getElementById('staffName').value.trim();
+    const gender = document.getElementById('staffGender').value;
+    const role = document.getElementById('staffRole').value.trim();
+    if (!regNo || !name || !gender || !role) return alert('All fields required');
+    const index = this.dataset.index;
+    if (index !== undefined) {
+        staff[parseInt(index)] = {regNo, name, gender, role};
+    } else {
+        if (staff.some(s => s.regNo === regNo)) return alert('Staff code already exists');
+        staff.push({regNo, name, gender, role});
+    }
+    saveSchoolData();
+    closeModal('addStaffModal');
+    renderAll();
+};
+function addClass() {
+    const name = prompt('Enter new class name (e.g. P1, S4, Nursery):').trim().toUpperCase();
+    if (!name) return;
+    if (classes.includes(name)) return alert('Class already exists');
+    classes.push(name);
+    saveSchoolData();
+    renderClasses();
+    populateClassFilter();
+    populateClassDropdown();
+}
+function editClassName(oldName) {
+    const newName = prompt('New class name:', oldName).trim().toUpperCase();
+    if (!newName || newName === oldName) return;
+    if (classes.includes(newName)) return alert('Class name already exists');
+    const index = classes.indexOf(oldName);
+    classes[index] = newName;
+    learners = learners.map(l => l.class === oldName ? {...l, class: newName} : l);
+    saveSchoolData();
+    renderAll();
+}
+function deleteClass(c) {
+    if (confirm(`Delete class ${c}? All learners will be unassigned from this class.`)) {
+        classes = classes.filter(x => x !== c);
+        learners = learners.map(l => l.class === c ? {...l, class: ''} : l);
+        saveSchoolData();
+        renderAll();
+    }
+}
+function showFeesModal() {
+    const f = feesStructure[currentTerm];
+    document.getElementById('nursery_school').value = f.nursery.school || 35000;
+    document.getElementById('lower_school').value = f.lower.school || 45000;
+    document.getElementById('upper_school').value = f.upper.school || 55000;
+    document.getElementById('ordinary_school').value = f.ordinary.school || 80000;
+    document.getElementById('advanced_school').value = f.advanced.school || 100000;
+    document.getElementById('feesModal').classList.remove('hidden');
+}
+function saveFeesStructure() {
+    feesStructure[currentTerm] = {
+        nursery: {school: parseInt(document.getElementById('nursery_school').value) || 35000},
+        lower: {school: parseInt(document.getElementById('lower_school').value) || 45000},
+        upper: {school: parseInt(document.getElementById('upper_school').value) || 55000},
+        ordinary: {school: parseInt(document.getElementById('ordinary_school').value) || 80000},
+        advanced: {school: parseInt(document.getElementById('advanced_school').value) || 100000}
+    };
+    saveSchoolData();
+    closeModal('feesModal');
+    renderFeesSummary();
+    renderAll();
+}
+function exportLearners() {
+    let csv = 'SDMS Code,Name,Father Name,Mother Name,Class,Gender,Due,Paid,Balance,Status\n';
+    learners.forEach(l => {
+        const due = getFeesDue(l.class);
+        const paid = getLearnerPayments(l.regNo).reduce((s, p) => s + p.amount, 0);
+        const balance = due - paid;
+        const status = paid >= due ? 'PAID' : paid > 0 ? 'PARTIAL' : 'PENDING';
+        csv += `${l.regNo},${l.name},${l.fatherName || ''},${l.motherName || ''},${l.class},${l.gender === 'M' ? 'Male' : 'Female'},${due},${paid},${balance},${status}\n`;
+    });
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'learners_export.csv';
+    a.click();
+}
+function downloadLearnerTemplate() {
+    const csv = 'SDMS Code,Name,Father Name,Mother Name,Gender,Class\nRW001,Example Name,Father Name,Mother Name,M,P1\n';
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'learners_template.csv';
+    a.click();
+}
+function importLearners(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const lines = e.target.result.split('\n');
+        let added = 0;
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const parts = line.split(',');
+            if (parts.length < 6) continue;
+            const regNo = parts[0].trim().toUpperCase();
+            const name = parts[1].trim();
+            const fatherName = parts[2].trim();
+            const motherName = parts[3].trim();
+            const gender = parts[4].trim().toUpperCase();
+            const cls = parts[5].trim().toUpperCase();
+            if (regNo && name && ['M','F'].includes(gender) && cls && !learners.some(l => l.regNo === regNo)) {
+                learners.push({regNo, name, fatherName, motherName, gender, class: cls});
+                added++;
+            }
+        }
+        saveSchoolData();
+        alert(`Successfully imported ${added} learners`);
+        renderAll();
+    };
+    reader.readAsText(file);
+}
+function exportStaff() {
+    let csv = 'Code,Name,Gender,Role\n';
+    staff.forEach(s => {
+        csv += `${s.regNo},${s.name},${s.gender === 'M' ? 'Male' : 'Female'},${s.role}\n`;
+    });
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'staff_export.csv';
+    a.click();
+}
+function downloadStaffTemplate() {
+    const csv = 'Code,Name,Gender,Role\nST001,Example Staff,M,Teacher\n';
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'staff_template.csv';
+    a.click();
+}
+function importStaff(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const lines = e.target.result.split('\n');
+        let added = 0;
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const parts = line.split(',');
+            if (parts.length < 4) continue;
+            const regNo = parts[0].trim().toUpperCase();
+            const name = parts[1].trim();
+            const gender = parts[2].trim().toUpperCase();
+            const role = parts[3].trim();
+            if (regNo && name && ['M','F'].includes(gender) && role && !staff.some(s => s.regNo === regNo)) {
+                staff.push({regNo, name, gender, role});
+                added++;
+            }
+        }
+        saveSchoolData();
+        alert(`Successfully imported ${added} staff members`);
+        renderAll();
+    };
+    reader.readAsText(file);
+}
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('loadingScreen').classList.remove('hidden');
+    populateSchoolSelector();
+    setTimeout(() => document.getElementById('loadingScreen').classList.add('hidden'), 1000);
 });
 </script>
-
 </body>
 </html>
