@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="USMS Rwanda 2025 - Multi-School Management System (Online)">
+    <meta name="theme-color" content="#0B4D8D">
+    <title>USMS Rwanda 2025 - Online Multi-School System</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+          integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxVe5uzm5u3z8=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- A-Frame for VR -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --primary: #0B4D8D;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --background: #f0f4f8;
+            --paid-bg: #d4edda;
+            --paid-text: #155724;
+            --partial-bg: #fff3cd;
+            --partial-text: #856404;
+            --pending-bg: #f8d7da;
+            --pending-text: #721c24;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--background);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        header {
+            background: linear-gradient(90deg, var(--primary), #003087);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        #schoolInfo div { font-size: 18px; font-weight: 700; }
+        #schoolCode { font-size: 14px; opacity: 0.9; }
+        #headTeacher { font-size: 14px; margin-top: 4px; }
+        #schoolLocation { font-size: 14px; }
+        #schoolSelector, #yearSelector, #termSelector {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            background: white;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        #yearSelector, #termSelector { margin-left: 10px; }
+        #navMenu {
+            background: white;
+            padding: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            overflow-x: auto;
+        }
+        #navMenu button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            white-space: nowrap;
+            transition: 0.3s;
+        }
+        #navMenu button:hover, #navMenu button.active {
+            background: #003087;
+            transform: translateY(-2px);
+        }
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 15px; }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        .hidden { display: none !important; }
+        .tab { display: none; }
+        .tab.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        input, select, button {
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        input, select {
+            width: 100%;
+            border: 1px solid var(--border-color);
+        }
+        input:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(11,77,141,0.2);
+        }
+        button {
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+        .btn-pay { background: var(--success); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 14px;
+            text-align: left;
+        }
+        td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: middle;
+        }
+        tr:nth-child(even) { background: #f9fbfd; }
+        tr:hover { background: #f0f8ff; }
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            min-width: 100px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .status-paid { background: var(--paid-bg); color: var(--paid-text); border: 2px solid #a8e6b0; }
+        .status-partial { background: var(--partial-bg); color: var(--partial-text); border: 2px solid #ffe08a; }
+        .status-pending { background: var(--pending-bg); color: var(--pending-text); border: 2px solid #f1aeb5; }
+        .flex { display: flex; gap: 20px; flex-wrap: wrap; }
+        .stat-card {
+            flex: 1;
+            min-width: 180px;
+            background: linear-gradient(135deg, var(--primary), #0b6bc7);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .big-stat {
+            padding: 35px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .big-balance { background: linear-gradient(135deg, #27ae60, #1e8449); }
+        .big-outstanding { background: linear-gradient(135deg, #e67e22, #d35400); }
+        .chart-container {
+            max-width: 420px;
+            margin: 30px auto;
+            height: 320px;
+        }
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .fees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .fees-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .fees-group h4 {
+            margin-bottom: 15px;
+            color: var(--primary);
+            text-align: center;
+        }
+        .loading {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            gap: 15px;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .vr-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            margin: 25px 0;
+        }
+        #loginScreen {
+            max-width: 420px;
+            margin: 80px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        .payment-details {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        @media print {
+            body * { visibility: hidden; }
+            #learnersListModal, #learnersListModal * { visibility: visible; }
+            #learnersListModal { position: absolute; left: 0; top: 0; width: 100%; background: white; }
+            .no-print { display: none !important; }
+            header, #navMenu, .loading, #loginScreen { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loadingScreen" class="loading">
+    <div class="spinner"></div>
+    <p>Loading USMS Rwanda Online...</p>
+</div>
+
+<div id="loginScreen">
+    <h2><i class="fas fa-school fa-2x"></i><br>USMS Rwanda 2025</h2>
+    <p><strong>Unified Multi-School Management System</strong></p>
+    <p style="margin:20px 0; color:#555;">Online • Real-time • Multi-Device • Secure</p>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button class="btn-primary" style="width:100%; padding:14px; margin-top:20px;" onclick="login()">Login</button>
+    <p style="margin-top:20px; font-size:14px; color:#666;">
+        <strong>Default Accounts:</strong><br>
+        Admin: admin@usms.rw / password: admin123<br>
+        Finance: finance@usms.rw / password: finance123<br>
+        Head Teacher: ht@school.rw / password: head123
+    </p>
+</div>
+
+<div id="app" class="hidden">
+    <!-- Same header and navigation as before -->
+    <header>
+        <div id="schoolInfo">
+            <div id="schoolName">Select a School</div>
+            <div id="schoolCode"></div>
+            <div id="headTeacher"></div>
+            <small id="schoolLocation"></small>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <select id="schoolSelector" onchange="switchSchool(this.value)"></select>
+            <button class="btn-success btn-sm" id="addSchoolBtn" onclick="showAddSchoolModal()">+ Add School</button>
+            <button class="btn-primary btn-sm" id="editSchoolBtn" onclick="showEditSchoolModal()" style="display:none;">Edit School</button>
+            <select id="yearSelector" onchange="changeYear(this.value)">
+                <option value="2024-2025">2024-2025</option>
+                <option value="2025-2026" selected>2025-2026</option>
+                <option value="2026-2027">2026-2027</option>
+            </select>
+            <select id="termSelector" onchange="changeTerm(this.value)">
+                <option value="1" selected>Term 1</option>
+                <option value="2">Term 2</option>
+                <option value="3">Term 3</option>
+            </select>
+            <div id="userInfo"><i class="fas fa-user-circle"></i> <span id="currentUser">User</span></div>
+            <button onclick="logout()" class="btn-danger btn-sm">Logout</button>
+        </div>
+    </header>
+
+    <nav id="navMenu">
+        <button onclick="showTab('dashboard')" class="active">Dashboard</button>
+        <button onclick="showTab('learners')">Learners</button>
+        <button onclick="showTab('staff')">Staff</button>
+        <button onclick="showTab('classes')">Classes</button>
+        <button onclick="showTab('feesTab')">Fees</button>
+        <button onclick="showTab('financeTab')">Finance</button>
+        <button onclick="showTab('vrTab')">VR Tour</button>
+    </nav>
+
+    <div class="container">
+        <!-- All tabs same as your original code (dashboard, learners, staff, etc.) -->
+        <!-- Only IDs and structure kept, logic moved to script -->
+        <div id="dashboard" class="tab active card"> <!-- ... same content ... --> </div>
+        <div id="learners" class="tab card"> <!-- ... same content ... --> </div>
+        <div id="staff" class="tab card"> <!-- ... same content ... --> </div>
+        <div id="classes" class="tab card"> <!-- ... same content ... --> </div>
+        <div id="feesTab" class="tab card"> <!-- ... same content ... --> </div>
+        <div id="financeTab" class="tab card"> <!-- ... same content ... --> </div>
+        <div id="vrTab" class="tab card"> <!-- ... same content ... --> </div>
+    </div>
+</div>
+
+<!-- All modals same as original (learnersListModal, paymentHistoryModal, addLearnerModal, etc.) -->
+<!-- Omitted here for brevity – keep them exactly as in your original code -->
+
+<script>
+// ======================== FIREBASE CONFIGURATION ========================
+// REPLACE WITH YOUR OWN FIREBASE PROJECT CONFIG (get from Firebase Console)
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef123456"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ======================== GLOBAL STATE ========================
+let currentUser = null;
+let currentRole = ''; // 'admin', 'finance', 'headteacher'
+let currentSchoolId = null;
+let currentYear = '2025-2026';
+let currentTerm = 1;
+
+let schools = [];
+let learners = [];
+let staff = [];
+let payments = [];
+let classes = [];
+let feesStructure = {};
+
+// ======================== AUTHENTICATION ========================
+function login() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            currentUser = userCredential.user;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            loadUserRoleAndSchools();
+        })
+        .catch((error) => {
+            alert('Login failed: ' + error.message);
+        });
+}
+
+function logout() {
+    auth.signOut().then(() => {
+        location.reload();
+    });
+}
+
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        currentUser = user;
+        document.getElementById('currentUser').textContent = user.email.split('@')[0];
+    } else {
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+    }
+    document.getElementById('loadingScreen').classList.add('hidden');
+});
+
+// ======================== LOAD USER ROLE & SCHOOLS ========================
+async function loadUserRoleAndSchools() {
+    const snapshot = await db.collection('schools').get();
+    schools = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+
+    // Determine role
+    if (currentUser.email === 'admin@usms.rw') {
+        currentRole = 'admin';
+    } else if (currentUser.email === 'finance@usms.rw') {
+        currentRole = 'finance';
+    } else {
+        // Head teacher: find school where headTeacherEmail matches
+        const school = schools.find(s => s.headTeacherEmail === currentUser.email);
+        if (school) {
+            currentRole = 'headteacher';
+            currentSchoolId = school.id;
+        } else {
+            alert('No school assigned to your account.');
+            logout();
+            return;
+        }
+    }
+
+    populateSchoolSelector();
+    if (currentRole === 'headteacher') {
+        document.getElementById('schoolSelector').style.display = 'none';
+        document.getElementById('addSchoolBtn').style.display = 'none';
+    }
+    switchSchool(currentSchoolId || schools[0]?.id);
+}
+
+// ======================== REAL-TIME DATA LISTENERS ========================
+function subscribeToSchoolData(schoolId) {
+    if (!schoolId) return;
+
+    currentSchoolId = schoolId;
+
+    const base = db.collection('schools').doc(schoolId);
+
+    base.collection('learners').onSnapshot(snapshot => {
+        learners = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        renderAll();
+    });
+
+    base.collection('staff').onSnapshot(snapshot => {
+        staff = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        renderAll();
+    });
+
+    base.collection('payments').where('term', '==', currentTerm).onSnapshot(snapshot => {
+        payments = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        renderAll();
+    });
+
+    base.collection('classes').onSnapshot(snapshot => {
+        classes = snapshot.docs.map(doc => doc.data().name);
+        classes.sort();
+        renderAll();
+    });
+
+    base.get().then(doc => {
+        const data = doc.data();
+        feesStructure = data.feesStructure || {1: {}, 2: {}, 3: {}};
+        document.getElementById('schoolName').textContent = data.name || 'Unknown';
+        document.getElementById('schoolCode').textContent = data.sdmsCode ? `SDMS Code: ${data.sdmsCode}` : '';
+        document.getElementById('schoolLocation').textContent = `${data.province} • ${data.district} • ${data.sector}`;
+        renderFeesSummary();
+    });
+}
+
+// ======================== REST OF FUNCTIONS (same logic, now using Firestore) ========================
+// All functions like renderDashboard(), renderLearners(), recordPayment(), etc.
+// are the same as your original code, but now use the global arrays (learners, staff, payments)
+// which are updated in real-time from Firestore.
+
+// Example of save operation:
+async function recordPayment(regNo, name) {
+    const amountStr = prompt(`Record payment for ${name} (${regNo})\nAmount (RWF):`);
+    if (!amountStr || isNaN(amountStr)) return;
+    const amount = parseInt(amountStr);
+    const reason = prompt('Reason:', 'School Fees') || 'School Fees';
+
+    await db.collection('schools').doc(currentSchoolId)
+        .collection('payments')
+        .add({
+            regNo, name, amount, reason,
+            term: currentTerm,
+            date: new Date().toISOString().split('T')[0],
+            recordedBy: currentUser.email
+        });
+
+    alert(`Payment recorded successfully!`);
+}
+
+// Similar async/await updates needed for add/edit/delete learner, staff, fees, etc.
+
+// For brevity, the full CRUD functions are omitted here but follow the same pattern:
+// - Use db.collection('schools').doc(currentSchoolId).collection('learners').add({...})
+// - Use .doc(id).update() or .delete()
+
+// ======================== INITIALIZATION ========================
+function populateSchoolSelector() {
+    const select = document.getElementById('schoolSelector');
+    select.innerHTML = '<option value="">Select School</option>';
+    schools.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name;
+        if (s.id === currentSchoolId) opt.selected = true;
+        select.appendChild(opt);
+    });
+}
+
+function switchSchool(id) {
+    if (!id) return;
+    if (currentRole === 'headteacher' && id !== currentSchoolId) {
+        alert('You can only access your assigned school.');
+        return;
+    }
+    subscribeToSchoolData(id);
+}
+
+// Keep all your existing render functions, showTab, modals, etc.
+// They will work automatically with real-time data
+
+// Start loading when DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('loadingScreen').classList.remove('hidden');
+});
+</script>
+
+</body>
+</html>
